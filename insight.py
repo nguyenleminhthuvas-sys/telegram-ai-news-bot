@@ -1,5 +1,5 @@
 """
-Dùng Claude để đọc mỗi bài báo và trích ra:
+Dùng Google Gemini (free tier) để đọc mỗi bài báo và trích ra:
 - key_point: tóm tắt sự kiện trong 1-2 câu
 - insight: TẠI SAO nó quan trọng / ý nghĩa sâu hơn đằng sau tin
 - skill_tip: 1 hành động/kỹ năng CỤ THỂ người đọc có thể áp dụng ngay
@@ -10,18 +10,22 @@ Dùng Claude để đọc mỗi bài báo và trích ra:
 """
 import json
 import re
-from anthropic import Anthropic
+import google.generativeai as genai
 
 import config
 
-_client = None
+_model = None
 
 
-def _get_client() -> Anthropic:
-    global _client
-    if _client is None:
-        _client = Anthropic(api_key=config.ANTHROPIC_API_KEY)
-    return _client
+def _get_model():
+    global _model
+    if _model is None:
+        genai.configure(api_key=config.GEMINI_API_KEY)
+        _model = genai.GenerativeModel(
+            model_name=config.GEMINI_MODEL,
+            system_instruction=SYSTEM_PROMPT,
+        )
+    return _model
 
 
 SYSTEM_PROMPT = """Bạn là biên tập viên tin tức AI kỳ cựu, viết cho một người đang \
@@ -58,31 +62,27 @@ def _strip_html(text: str) -> str:
 
 def extract_insight(article: dict) -> dict:
     """
-    Gọi Claude để phân tích 1 bài viết. Trả về dict với key_point/insight/skill_tip/hot_score.
+    Gọi Gemini để phân tích 1 bài viết. Trả về dict với key_point/insight/skill_tip/hot_score.
     Nếu có lỗi (API lỗi, JSON không parse được), trả về giá trị mặc định an toàn (hot_score=0)
     thay vì crash cả tiến trình — để 1 bài lỗi không làm dừng cả lượt quét tin.
     """
-    client = _get_client()
+    model = _get_model()
     summary_text = _strip_html(article.get("summary", ""))[:1500]
 
     try:
-        response = client.messages.create(
-            model=config.CLAUDE_MODEL,
-            max_tokens=500,
-            system=SYSTEM_PROMPT,
-            messages=[{
-                "role": "user",
-                "content": USER_TEMPLATE.format(
-                    source=article["source"],
-                    title=article["title"],
-                    summary=summary_text or "(không có tóm tắt, hãy suy luận từ tiêu đề)",
-                    link=article["link"],
-                ),
-            }],
+        response = model.generate_content(
+            USER_TEMPLATE.format(
+                source=article["source"],
+                title=article["title"],
+                summary=summary_text or "(không có tóm tắt, hãy suy luận từ tiêu đề)",
+                link=article["link"],
+            ),
+            generation_config=genai.types.GenerationConfig(
+                max_output_tokens=500,
+                temperature=0.3,
+            ),
         )
-        raw_text = "".join(
-            block.text for block in response.content if getattr(block, "type", None) == "text"
-        )
+        raw_text = response.text
         match = _JSON_BLOCK_RE.search(raw_text)
         if not match:
             raise ValueError(f"Không tìm thấy JSON trong phản hồi: {raw_text[:200]}")

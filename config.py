@@ -9,16 +9,16 @@ load_dotenv()  # đọc file .env nếu có (khi chạy local)
 
 # --- Bắt buộc ---
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # --- Nơi gửi tin (cần ít nhất 1 trong 2) ---
 TELEGRAM_PERSONAL_CHAT_ID = os.getenv("TELEGRAM_PERSONAL_CHAT_ID")  # chat riêng của bạn
 TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID")              # vd: @ten_kenh_cua_ban hoặc -100xxxxxxxxxx
 
 # --- Tùy chỉnh ---
-# Model Claude dùng để trích Insight. Đổi sang "claude-haiku-4-5-20251001" nếu muốn tiết kiệm chi phí
-# (bot gọi model rất nhiều lần/ngày), hoặc giữ "claude-sonnet-5" để chất lượng insight tốt hơn.
-CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-sonnet-5")
+# Model Gemini dùng để trích Insight. gemini-2.0-flash-lite là free và nhanh nhất.
+# Đổi sang "gemini-1.5-flash" nếu muốn chất lượng cao hơn (cũng free).
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-lite")
 
 HOT_THRESHOLD = int(os.getenv("HOT_THRESHOLD", "8"))              # điểm HOT (1-10) để bắn alert ngay
 FETCH_INTERVAL_MINUTES = int(os.getenv("FETCH_INTERVAL_MINUTES", "30"))  # tần suất quét nguồn tin
@@ -35,8 +35,8 @@ def validate():
     missing = []
     if not TELEGRAM_BOT_TOKEN:
         missing.append("TELEGRAM_BOT_TOKEN")
-    if not ANTHROPIC_API_KEY:
-        missing.append("ANTHROPIC_API_KEY")
+    if not GEMINI_API_KEY:
+        missing.append("GEMINI_API_KEY")
     if missing:
         raise RuntimeError(
             f"Thiếu biến môi trường bắt buộc: {', '.join(missing)}. "
