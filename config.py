@@ -25,7 +25,7 @@ FETCH_INTERVAL_MINUTES = int(os.getenv("FETCH_INTERVAL_MINUTES", "30"))  # tần
 DIGEST_HOUR = int(os.getenv("DIGEST_HOUR", "7"))                  # giờ gửi digest sáng (theo TIMEZONE)
 TIMEZONE = os.getenv("TIMEZONE", "Asia/Ho_Chi_Minh")
 
-DB_PATH = os.getenv("DB_PATH", "ai_news.db")
+DB_PATH = os.getenv("DB_PATH", "ai_news_v2.db")
 
 MAX_ARTICLES_PER_FETCH = int(os.getenv("MAX_ARTICLES_PER_FETCH", "40"))  # giới hạn số bài xử lý/lượt quét
 
