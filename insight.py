@@ -10,6 +10,7 @@ Dùng Google Gemini (free tier) để đọc mỗi bài báo và trích ra:
 """
 import json
 import re
+import time
 import google.generativeai as genai
 
 import config
@@ -68,6 +69,7 @@ def extract_insight(article: dict) -> dict:
     """
     model = _get_model()
     summary_text = _strip_html(article.get("summary", ""))[:1500]
+    time.sleep(2)  # rate limit: free tier cho phép 30 req/phút = tối đa 2s/request
 
     try:
         response = model.generate_content(
