@@ -16,8 +16,7 @@ TELEGRAM_PERSONAL_CHAT_ID = os.getenv("TELEGRAM_PERSONAL_CHAT_ID")  # chat riên
 TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID")              # vd: @ten_kenh_cua_ban hoặc -100xxxxxxxxxx
 
 # --- Tùy chỉnh ---
-# Model Gemini dùng để trích Insight. gemini-2.0-flash-lite là free và nhanh nhất.
-# Đổi sang "gemini-1.5-flash" nếu muốn chất lượng cao hơn (cũng free).
+# Model Gemini. gemini-2.0-flash-lite: miễn phí, nhanh, 1500 req/ngày với API key thật.
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-lite")
 
 HOT_THRESHOLD = int(os.getenv("HOT_THRESHOLD", "8"))              # điểm HOT (1-10) để bắn alert ngay

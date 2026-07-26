@@ -3,10 +3,7 @@ Dùng Google Gemini (free tier) để đọc mỗi bài báo và trích ra:
 - key_point: tóm tắt sự kiện trong 1-2 câu
 - insight: TẠI SAO nó quan trọng / ý nghĩa sâu hơn đằng sau tin
 - skill_tip: 1 hành động/kỹ năng CỤ THỂ người đọc có thể áp dụng ngay
-  để nâng cấp cách dùng AI của họ (đây là phần khác biệt so với 1 bot tin tức thường)
 - hot_score: 1-10, mức độ "phải biết ngay" của tin này
-
-Đây là trái tim của bot — nơi biến "tin tức" thành "value".
 """
 import json
 import re
@@ -41,10 +38,8 @@ theo đúng cấu trúc:
   "insight": "2-3 câu giải thích Ý NGHĨA sâu hơn: vì sao nó quan trọng, xu hướng nó cho thấy, \
 tác động thực tế — không lặp lại key_point",
   "skill_tip": "1 hành động CỤ THỂ, làm được ngay, để người đọc áp dụng kiến thức này vào việc \
-dùng AI hiệu quả hơn (vd: 1 kỹ thuật prompt, 1 công cụ nên thử, 1 cách tư duy mới). \
-Nếu bài không có ứng dụng thực tế rõ ràng, hãy nêu điều nên theo dõi tiếp theo.",
-  "hot_score": <số nguyên 1-10, 10 = tin chấn động phải biết ngay lập tức (vd: model/sản phẩm \
-mới đột phá, thay đổi lớn về chính sách/an toàn AI), 1 = tin phụ, ít tác động>
+dùng AI hiệu quả hơn. Nếu bài không có ứng dụng rõ ràng, hãy nêu điều nên theo dõi.",
+  "hot_score": <số nguyên 1-10>
 }"""
 
 USER_TEMPLATE = """Nguồn: {source}
@@ -64,12 +59,11 @@ def _strip_html(text: str) -> str:
 def extract_insight(article: dict) -> dict:
     """
     Gọi Gemini để phân tích 1 bài viết. Trả về dict với key_point/insight/skill_tip/hot_score.
-    Nếu có lỗi (API lỗi, JSON không parse được), trả về giá trị mặc định an toàn (hot_score=0)
-    thay vì crash cả tiến trình — để 1 bài lỗi không làm dừng cả lượt quét tin.
+    Nếu có lỗi, trả về giá trị mặc định an toàn (hot_score=0).
     """
     model = _get_model()
     summary_text = _strip_html(article.get("summary", ""))[:1500]
-    time.sleep(2)  # rate limit: free tier cho phép 30 req/phút = tối đa 2s/request
+    time.sleep(2)  # rate limit: free tier ~30 req/phút
 
     try:
         response = model.generate_content(
