@@ -1,5 +1,5 @@
 """
-AI Insight Bot — bot Telegram tự động quét tin AI mới nhất, dùng Claude
+AI Insight Bot — bot Telegram tự động quét tin AI mới nhất, dùng Gemini
 để trích Key Point / Insight / Skill Tip cho mỗi bài, rồi:
   - Bắn ALERT ngay khi có tin đạt ngưỡng HOT_THRESHOLD
   - Gửi 1 DIGEST tổng hợp mỗi sáng lúc DIGEST_HOUR (giờ TIMEZONE)
@@ -55,8 +55,8 @@ async def daily_digest_job(bot: Bot):
     """Chạy mỗi ngày lúc DIGEST_HOUR: tổng hợp toàn bộ bài chưa vào digest, gửi 1 (hoặc vài) tin tổng hợp."""
     log.info("Đang tạo digest sáng...")
     pending = storage.get_pending_digest_articles(config.DB_PATH)
-    # Chỉ đưa vào digest những bài đã trích insight thành công (hot_score > 0)
-    pending = [a for a in pending if a["hot_score"] > 0]
+    # Chỉ lấy bài đã có key_point (trích insight thành công); bài lỗi hot_score=0 bỏ qua.
+    pending = [a for a in pending if a.get("key_point")]
 
     if not pending:
         log.info("Không có bài nào cho digest hôm nay.")
